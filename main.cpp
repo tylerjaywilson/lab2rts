@@ -4,9 +4,9 @@
 #include <string>
 #include <stdlib.h>
 #include <sstream>
+#include <algorithm> 
 
 using namespace std;
-
 
 int main()
 {
@@ -64,8 +64,14 @@ int main()
   /*******************************************************************************************************************/
   /**************** This ends the section handling the parsing of the input file *************************************/
   
-
   
+
+  for (int i=0; i<num_of_tasks; i++)
+  {
+    cout<<"ID: "<<taskset[i].get_id()<<endl;
+  }
+
+
   delete [] taskset;    //Free up the allocated space for the taskset pointer.
   return 1;
 }
