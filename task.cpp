@@ -7,6 +7,15 @@
 
 #include "task.hpp"
 
+//Default Constructor
+Task::Task()
+{
+	id = -1;
+	extime = -1;
+	period = -1;
+}
+
+//Constructor
 Task::Task(int id_t, int time, int period_t)
 {
   id = id_t;

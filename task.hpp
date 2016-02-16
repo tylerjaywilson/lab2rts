@@ -8,6 +8,7 @@ class Task{
   int period;
 
 public:
+  Task();
   Task(int id_t, int extime, int period); 
   int get_id();
   void set_id(int id_t);
@@ -15,6 +16,6 @@ public:
   void set_extime(int time);
   int get_period();
   void set_period(int period_t);
-}
+};
 
 #endif
