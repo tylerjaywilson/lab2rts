@@ -16,4 +16,5 @@ public:
   int get_period();
   void set_period(int period_t);
 }
+
 #endif

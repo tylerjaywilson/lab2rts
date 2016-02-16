@@ -1,10 +1,9 @@
 /*
-* Athour: Jorden Luke & Tyler Wilson
+* Authors: Jorden Luke & Tyler Wilson
 * Date: 02/16/2016
 * Notes: This class is used to hold the data for task. It was used as part of 
 * Lab 2 for real time processors.
 */
-
 
 #include "task.hpp"
 
