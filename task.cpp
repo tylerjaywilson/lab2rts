@@ -22,7 +22,7 @@ Task::Task(int id_t, int time, int period_t)
   extime = time;
   period = period_t;
 } 
-int Task::get_id()
+int Task::get_id() const
 {
   return id;
 }
@@ -30,7 +30,7 @@ void Task::set_id(int id_t)
 {
   id = id_t;
 }
-int Task::get_extime()
+int Task::get_extime() const
 {
   return extime;
 }
@@ -38,15 +38,11 @@ void Task::set_extime(int time)
 {
   extime = time;
 }
-int Task::get_period()
+int Task::get_period() const
 {
   return period;
 }
 void Task::set_period(int period_t)
 {
   period = period_t;
-}
-bool Task::period_cmp(const Task &a, const Task &b)
-{
-  return a.get_period() < b.get_period();
 }

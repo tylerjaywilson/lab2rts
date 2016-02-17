@@ -10,13 +10,12 @@ class Task{
 public:
   Task();
   Task(int id_t, int extime, int period); 
-  int get_id();
+  int get_id() const;
   void set_id(int id_t);
-  int get_extime();
+  int get_extime() const;
   void set_extime(int time);
-  int get_period();
+  int get_period() const;
   void set_period(int period_t);
-  bool period_cmp(const Task &a, const Task &b);
 };
 
 #endif

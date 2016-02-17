@@ -13,10 +13,16 @@
 
 using namespace std;
 
-//functions used to for scheduling input tasks
-void rm_sch(Task *tasks,int num, int time);
-void edf_sch(Task *tasks,int num,int time);
+//Functions used to for scheduling input tasks
+void rm_sch(Task *, int, int);
+void edf_sch(Task *, int, int);
+void edf_sch(Task *, int, int);
 bool period_cmp(Task const &a, Task const  &b);
+
+//Print functions
+void printId(Task *, int);
+void printPeriod(Task *, int);
+void printCost(Task *, int);
 
 //main function
 int main()
@@ -24,6 +30,7 @@ int main()
   ifstream systeminfo ("input_file.txt");
   int num_of_tasks = -1;		//The total number of tasks to be scheduled - Determined by an input file.
   int sim_time = -1;        //The total simulation time of the system - Determined by an input file.
+  int hyper_period = -1;    //The hyper_period is used to determine the length of the schedule - WE MIGHT NOT USE THIS
   string input_line;        //Store each line from the input file to allow for parsing.
   Task *taskset;
   
@@ -74,44 +81,71 @@ int main()
   }
     
 /*******************************************************************************************************************/
-  /**************** This ends the section handling the parsing of the input file *************************************/
-  
-  
+/**************** This ends the section handling the parsing of the input file *************************************/
 
-  for (int i=0; i<num_of_tasks; i++)
-  {
-    cout<<"ID: "<<taskset[i].get_id()<<endl;
-  }
-
+  printId(taskset, num_of_tasks);
+  //Perform RM Scheduling
+  rm_sch(taskset, num_of_tasks, sim_time);
+  printId(taskset, num_of_tasks);
 
   delete [] taskset;    //Free up the allocated space for the taskset pointer.
   return 1;
 }
 
-void rm_sch(Task *tasks,int num, int time)
+//Use Rate Monotonic scheduling - This function schedules the task set
+void rm_sch(Task *tasks, int numTasks, int simTime)
 {
-  sort(tasks, tasks + num, period_cmp);
-  
-  for(int i = 0; i < num; i ++ )
-  {
+  cout << "--- Beginning the RM scheduling algorithm ---" << endl;
 
-    cout<< tasks[i].get_period();
-    
-  }
-  
+  //Sort the tasks in the Task array to be sorted in ascending order of their period (RM)
+  sort(tasks, tasks + numTasks, period_cmp);
+
+
+
+  cout << "--- Ending the RM scheduling algorithm ---" << endl;
 }
+
+//Use Earliest Deadline First scheduling - This function schedules the task set
+void edf_sch(Task *tasks, int numTasks, int simTime)
+{
+  cout << "--- Beginning the RM scheduling algorithm ---" << endl;
+
+  //Sort the tasks in the Task array to be sorted in ascending order of their period (RM)
+  sort(tasks, tasks + numTasks, period_cmp);
+
+
+  cout << "--- Ending the RM scheduling algorithm ---" << endl;
+}
+
+//Compare the periods of the different tasks to organize them in ascending order
 bool period_cmp(const Task &a, const Task &b)
 {
   return a.get_period() < b.get_period();
 }
 
+//Print the ID of each task
+void printId(Task *tasks, int numTasks)
+{
+  for(int i = 0; i < numTasks; i ++ )
+  {
+    cout << tasks[i].get_id() << endl;    
+  }
+}
 
+//Print the Period of each task
+void printPeriod(Task *tasks, int numTasks)
+{
+  for(int i = 0; i < numTasks; i ++ )
+  {
+    cout << tasks[i].get_period() << endl;    
+  }
+}
 
-
-
-
-
-
-
-
-
+//Print the Execution time of each task
+void printCost(Task *tasks, int numTasks)
+{
+  for(int i = 0; i < numTasks; i ++ )
+  {
+    cout << tasks[i].get_extime() << endl;    
+  }
+}
