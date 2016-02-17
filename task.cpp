@@ -46,3 +46,7 @@ void Task::set_period(int period_t)
 {
   period = period_t;
 }
+bool Task::period_cmp(const Task &a, const Task &b)
+{
+  return a.get_period() < b.get_period();
+}

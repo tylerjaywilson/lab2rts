@@ -1,3 +1,8 @@
+/*
+* Authors: Jorden Luke & Tyler Wilson
+* Date: 02/16/2016
+* Notes: This is used to ren the main operation of the the algorithms
+*/
 #include <iostream>
 #include <fstream>
 #include "task.hpp"
@@ -8,6 +13,12 @@
 
 using namespace std;
 
+//functions used to for scheduling input tasks
+void rm_sch(Task *tasks,int num, int time);
+void edf_sch(Task *tasks,int num,int time);
+bool period_cmp(Task const &a, Task const  &b);
+
+//main function
 int main()
 {
   ifstream systeminfo ("input_file.txt");
@@ -61,7 +72,8 @@ int main()
   	cout << "Unable to open the input file!";
   	return 0;
   }
-  /*******************************************************************************************************************/
+    
+/*******************************************************************************************************************/
   /**************** This ends the section handling the parsing of the input file *************************************/
   
   
@@ -75,3 +87,31 @@ int main()
   delete [] taskset;    //Free up the allocated space for the taskset pointer.
   return 1;
 }
+
+void rm_sch(Task *tasks,int num, int time)
+{
+  sort(tasks, tasks + num, period_cmp);
+  
+  for(int i = 0; i < num; i ++ )
+  {
+
+    cout<< tasks[i].get_period();
+    
+  }
+  
+}
+bool period_cmp(const Task &a, const Task &b)
+{
+  return a.get_period() < b.get_period();
+}
+
+
+
+
+
+
+
+
+
+
+

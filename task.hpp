@@ -16,6 +16,7 @@ public:
   void set_extime(int time);
   int get_period();
   void set_period(int period_t);
+  bool period_cmp(const Task &a, const Task &b);
 };
 
 #endif
