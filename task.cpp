@@ -13,6 +13,7 @@ Task::Task()
 	id = -1;
 	extime = -1;
 	period = -1;
+  rem_extime = -1;
 }
 
 //Constructor
@@ -21,6 +22,7 @@ Task::Task(int id_t, int extime_t, int period_t)
   id = id_t;
   extime = extime_t;
   period = period_t;
+  rem_extime = extime_t;
 } 
 int Task::get_id() const
 {
@@ -45,4 +47,12 @@ int Task::get_period() const
 void Task::set_period(int period_t)
 {
   period = period_t;
+}
+int Task::get_rem_extime() const
+{
+  return rem_extime;
+}
+void Task::set_rem_extime(int rem_extime_t)
+{
+  rem_extime = rem_extime_t;
 }

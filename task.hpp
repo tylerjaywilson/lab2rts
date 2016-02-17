@@ -6,6 +6,7 @@ class Task{
   int id;
   int extime;
   int period;
+  int rem_extime;
 
 public:
   Task();
@@ -16,6 +17,8 @@ public:
   void set_extime(int extime_t);
   int get_period() const;
   void set_period(int period_t);
+  int get_rem_extime() const;
+  void set_rem_extime(int rem_extime_t);
 };
 
 #endif

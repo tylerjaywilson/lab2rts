@@ -15,8 +15,8 @@
 using namespace std;
 
 //Functions used to for scheduling input tasks
-void rm_sch(Task *, int, int);
-void edf_sch(Task *, int, int);
+void rm_sch(Task *, int, int, Schedule *);
+void edf_sch(Task *, int, int, Schedule *);
 void edf_sch(Task *, int, int);
 bool period_cmp(Task const &a, Task const  &b);
 
@@ -33,7 +33,8 @@ int main()
   int sim_time = -1;        //The total simulation time of the system - Determined by an input file.
   int hyper_period = -1;    //The hyper_period is used to determine the length of the schedule - WE MIGHT NOT USE THIS
   string input_line;        //Store each line from the input file to allow for parsing.
-  Task *taskset;
+  Task *taskset;            //A Task pointer that holds the information of all the tasks from the input file
+  Schedule *taskSchedule;   //The taskSchedule holds information regarding the operation of tasks at any given time
   
   /*******************************************************************************************************************/
   /**************** This section handles the parsing of the input file ***********************************************/
@@ -86,7 +87,7 @@ int main()
 
   printId(taskset, num_of_tasks);
   //Perform RM Scheduling
-  rm_sch(taskset, num_of_tasks, sim_time);
+  rm_sch(taskset, num_of_tasks, sim_time, taskSchedule);
   printId(taskset, num_of_tasks);
 
   delete [] taskset;    //Free up the allocated space for the taskset pointer.
@@ -94,7 +95,7 @@ int main()
 }
 
 //Use Rate Monotonic scheduling - This function schedules the task set
-void rm_sch(Task *tasks, int numTasks, int simTime)
+void rm_sch(Task *tasks, int numTasks, int simTime, Schedule *taskSch)
 {
   cout << "--- Beginning the RM scheduling algorithm ---" << endl;
 
@@ -106,7 +107,8 @@ void rm_sch(Task *tasks, int numTasks, int simTime)
   //Run in a loop for the entire simulation time to create a schedule
   for(int i=0; i<simTime; i++)
   {
-    
+    taskSch[i].set_curr_time(i);
+    taskSch[i].set_task_id(curr_task.get_id());    
 
   }
 
@@ -115,7 +117,7 @@ void rm_sch(Task *tasks, int numTasks, int simTime)
 }
 
 //Use Earliest Deadline First scheduling - This function schedules the task set
-void edf_sch(Task *tasks, int numTasks, int simTime)
+void edf_sch(Task *tasks, int numTasks, int simTime, Schedule *taskSch)
 {
   cout << "--- Beginning the RM scheduling algorithm ---" << endl;
 
