@@ -31,7 +31,7 @@ int main()
   ifstream systeminfo ("input_file.txt");
   int num_of_tasks = -1;		//The total number of tasks to be scheduled - Determined by an input file.
   int sim_time = -1;        //The total simulation time of the system - Determined by an input file.
-  int hyper_period = -1;    //The hyper_period is used to determine the length of the schedule - WE MIGHT NOT USE THIS
+  //int hyper_period = -1;    //The hyper_period is used to determine the length of the schedule - WE MIGHT NOT USE THIS
   string input_line;        //Store each line from the input file to allow for parsing.
   Task *taskset;            //A Task pointer that holds the information of all the tasks from the input file
   Schedule *taskSchedule;   //The taskSchedule holds information regarding the operation of tasks at any given time
@@ -45,6 +45,7 @@ int main()
     getline(systeminfo, input_line);              //Determine the total simulation time.
     istringstream(input_line) >> sim_time;
     taskset = new Task[num_of_tasks];             //Allocate memory for the total number of tasks.
+    taskSchedule = new Schedule[sim_time];        //Allocate memory for the simulation time schedule.
 
     cout << "Number of tasks: " << num_of_tasks << endl;
     cout << "Total Simulation Time: " << sim_time << endl;
@@ -64,7 +65,8 @@ int main()
 
       ss >> temp;
       cout << "Execution Time: " << temp << endl;
-      taskset[i].set_extime(temp);    //Set the current task's execution time
+      taskset[i].set_extime(temp);      //Set the current task's execution time
+      taskset[i].set_rem_extime(temp);  //Set the current task's remaining execution time
 
       if(ss.peek() == ',')
         ss.ignore();
@@ -82,8 +84,8 @@ int main()
   	return 0;
   }
     
-/*******************************************************************************************************************/
-/**************** This ends the section handling the parsing of the input file *************************************/
+  /*******************************************************************************************************************/
+  /**************** This ends the section handling the parsing of the input file *************************************/
 
   printId(taskset, num_of_tasks);
   //Perform RM Scheduling
@@ -102,16 +104,90 @@ void rm_sch(Task *tasks, int numTasks, int simTime, Schedule *taskSch)
   //Sort the tasks in the Task array to be sorted in ascending order of their period (RM)
   sort(tasks, tasks + numTasks, period_cmp);
 
-  Task curr_task = tasks[0];
+  int curr_entry = 0;
+  int waitingQueue[numTasks];
 
   //Run in a loop for the entire simulation time to create a schedule
-  for(int i=0; i<simTime; i++)
+  for(int runtime=0; runtime<simTime; runtime++)
   {
-    taskSch[i].set_curr_time(i);
-    taskSch[i].set_task_id(curr_task.get_id());    
+    //First - check to see if another task is waiting to be scheduled
+    //Second - If another task is ready to be scheduled, does it have higher priority (smaller period)?
+    //Third - If so, preempt the current task and add the current task to the waiting queue.
+    //         If not, continue execution of the current task. Add the new task in the waiting queue
+    
+    //Add items to the waitinqQueue that are being released at the current runtime
+    for(int i=0; i<numTasks; i++)
+    {
+      if(runtime % tasks[i].get_period() == 0)
+        waitingQueue[i] = i;
+    }
 
+    //Check to see if any tasks have a higher priority than the current task
+    for(int l=0; l<numTasks; l++)
+    {
+      bool possible_preemption = true;  //Preemption can occur if a task is currently using the CPU
+      //There is no current task, see if the waiting queue has anything ready to execute
+      if(curr_entry == -1)
+      {        
+        int m=0;
+        bool found, endlist = false;
+        possible_preemption = false;    //Preemption cannot occur. The CPU is free.
+
+        while(!found && !endlist)
+        {
+          if(waitingQueue[m] != -1)
+          {
+            curr_entry = m;
+            found = true;
+          }
+          else if(m == numTasks)
+            endlist = true;
+          else
+            m++;
+        }
+      }
+      
+      if(curr_entry != -1)
+      {
+        //Preemption occurs and a new task begins running. Old task state is saved.
+        if((tasks[l].get_period() < tasks[curr_entry].get_period()) && (waitingQueue[l] != -1) && (possible_preemption))
+        { 
+          cout << "Preemption occured!" << endl;        
+          taskSch[runtime].set_preempted_task(tasks[curr_entry].get_id());
+          curr_entry = l;  
+        } 
+        else
+        {
+          cout << "No preemption!" << endl;  
+          //cout << "Here" << endl;
+          taskSch[runtime].set_preempted_task(-1);  //No preemption occured.
+          //cout << "Here" << endl;
+        }
+       
+        //Execute one time unit for the current task and save the information to the schedule
+        tasks[curr_entry].set_rem_extime((tasks[curr_entry].get_rem_extime()-1));         //Take one time unit off the execution time remaining
+        //taskSch[runtime].set_curr_time(runtime);
+        taskSch[runtime].set_task_id(tasks[curr_entry].get_id());        
+      }
+      else
+      {
+        cout << "No task is running at this time unit!" << endl;
+      }  
+      
+      //Check to see if the current task finished execution - if so, free it from the waiting queue
+      if(tasks[curr_entry].get_rem_extime() == 0)
+      {
+        cout << "The task finished its execution!" << endl;
+        waitingQueue[curr_entry] = -1;
+        curr_entry = -1;                  //There is no current task because it just finished
+     }
+    }    
   }
 
+  for(int p=0; p<simTime; p++)
+  {
+    cout << taskSch[p].get_curr_time() << "\t" << taskSch[p].get_task_id() << "\t" << taskSch[p].get_preempted_task() << endl;
+  }
 
   cout << "--- Ending the RM scheduling algorithm ---" << endl;
 }
