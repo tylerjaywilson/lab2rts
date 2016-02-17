@@ -2,7 +2,7 @@
 all: main
 
 main: main.o task.o
-	g++ main.cpp task.cpp -o rtslab2
+	g++ main.cpp task.cpp schedule.cpp -o rtslab2
 
 clean:
 	rm *o rtslab2

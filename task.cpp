@@ -16,10 +16,10 @@ Task::Task()
 }
 
 //Constructor
-Task::Task(int id_t, int time, int period_t)
+Task::Task(int id_t, int extime_t, int period_t)
 {
   id = id_t;
-  extime = time;
+  extime = extime_t;
   period = period_t;
 } 
 int Task::get_id() const
@@ -34,9 +34,9 @@ int Task::get_extime() const
 {
   return extime;
 }
-void Task::set_extime(int time)
+void Task::set_extime(int extime_t)
 {
-  extime = time;
+  extime = extime_t;
 }
 int Task::get_period() const
 {

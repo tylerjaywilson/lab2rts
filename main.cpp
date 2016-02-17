@@ -6,6 +6,7 @@
 #include <iostream>
 #include <fstream>
 #include "task.hpp"
+#include "schedule.hpp"
 #include <string>
 #include <stdlib.h>
 #include <sstream>
@@ -100,6 +101,14 @@ void rm_sch(Task *tasks, int numTasks, int simTime)
   //Sort the tasks in the Task array to be sorted in ascending order of their period (RM)
   sort(tasks, tasks + numTasks, period_cmp);
 
+  Task curr_task = tasks[0];
+
+  //Run in a loop for the entire simulation time to create a schedule
+  for(int i=0; i<simTime; i++)
+  {
+    
+
+  }
 
 
   cout << "--- Ending the RM scheduling algorithm ---" << endl;
