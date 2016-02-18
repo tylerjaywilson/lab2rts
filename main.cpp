@@ -92,6 +92,7 @@ int main()
   rm_sch(taskset, num_of_tasks, sim_time, taskSchedule);
   printId(taskset, num_of_tasks);
 
+  delete [] taskSchedule; //Free up the allocated space for the taskSchedule pointer.
   delete [] taskset;    //Free up the allocated space for the taskset pointer.
   return 1;
 }
@@ -122,66 +123,68 @@ void rm_sch(Task *tasks, int numTasks, int simTime, Schedule *taskSch)
         waitingQueue[i] = i;
     }
 
-    //Check to see if any tasks have a higher priority than the current task
-    for(int l=0; l<numTasks; l++)
-    {
-      bool possible_preemption = true;  //Preemption can occur if a task is currently using the CPU
-      //There is no current task, see if the waiting queue has anything ready to execute
-      if(curr_entry == -1)
-      {        
-        int m=0;
-        bool found, endlist = false;
-        possible_preemption = false;    //Preemption cannot occur. The CPU is free.
+    cout << "waiting 1: " << waitingQueue[0] << endl;
+    cout << "waiting 2: " << waitingQueue[1] << endl;
+    cout << "waiting 3: " << waitingQueue[2] << endl;
 
-        while(!found && !endlist)
-        {
-          if(waitingQueue[m] != -1)
-          {
-            curr_entry = m;
-            found = true;
-          }
-          else if(m == numTasks)
-            endlist = true;
-          else
-            m++;
-        }
-      }
-      
-      if(curr_entry != -1)
+
+    //Check to see if any tasks have a higher priority than the current task
+    bool possible_preemption = true;  //Preemption can occur if a task is currently using the CPU
+    //There is no current task, see if the waiting queue has anything ready to execute
+    if(curr_entry == -1)
+    {        
+      int m=0;
+      bool found, endlist = false;
+      possible_preemption = false;    //Preemption cannot occur. The CPU is free.
+
+      while(!found && !endlist)
       {
-        //Preemption occurs and a new task begins running. Old task state is saved.
-        if((tasks[l].get_period() < tasks[curr_entry].get_period()) && (waitingQueue[l] != -1) && (possible_preemption))
-        { 
-          cout << "Preemption occured!" << endl;        
-          taskSch[runtime].set_preempted_task(tasks[curr_entry].get_id());
-          curr_entry = l;  
-        } 
-        else
+        if(waitingQueue[m] != -1)
         {
-          cout << "No preemption!" << endl;  
-          //cout << "Here" << endl;
-          taskSch[runtime].set_preempted_task(-1);  //No preemption occured.
-          //cout << "Here" << endl;
+          curr_entry = m;
+          found = true;
         }
-       
-        //Execute one time unit for the current task and save the information to the schedule
-        tasks[curr_entry].set_rem_extime((tasks[curr_entry].get_rem_extime()-1));         //Take one time unit off the execution time remaining
-        //taskSch[runtime].set_curr_time(runtime);
-        taskSch[runtime].set_task_id(tasks[curr_entry].get_id());        
+        else if(m == numTasks)
+          endlist = true;
+        else
+          m++;
       }
+    }
+
+    
+    if(curr_entry != -1)
+    {
+      //Preemption occurs and a new task begins running. Old task state is saved.
+      if((tasks[l].get_period() < tasks[curr_entry].get_period()) && (waitingQueue[l] != -1) && (possible_preemption))
+      { 
+        cout << "Preemption occured!" << endl;        
+        taskSch[runtime].set_preempted_task(tasks[curr_entry].get_id());
+        curr_entry = l;  
+      } 
       else
       {
-        cout << "No task is running at this time unit!" << endl;
-      }  
-      
-      //Check to see if the current task finished execution - if so, free it from the waiting queue
-      if(tasks[curr_entry].get_rem_extime() == 0)
-      {
-        cout << "The task finished its execution!" << endl;
-        waitingQueue[curr_entry] = -1;
-        curr_entry = -1;                  //There is no current task because it just finished
-     }
-    }    
+        cout << "No preemption!" << endl;  
+        taskSch[runtime].set_preempted_task(-1);  //No preemption occured.
+      }
+     
+      //Execute one time unit for the current task and save the information to the schedule
+      tasks[curr_entry].set_rem_extime((tasks[curr_entry].get_rem_extime()-1));         //Take one time unit off the execution time remaining
+      //taskSch[runtime].set_curr_time(runtime);
+      taskSch[runtime].set_task_id(tasks[curr_entry].get_id());        
+    }
+    else
+    {
+      cout << "No task is running at this time unit!" << endl;
+    }  
+    
+    //Check to see if the current task finished execution - if so, free it from the waiting queue
+    if(tasks[curr_entry].get_rem_extime() == 0)
+    {
+      cout << "The task finished its execution!" << endl;
+      tasks[curr_entry].set_rem_extime(tasks[curr_entry].get_extime());   //Reset the task execution time.
+      waitingQueue[curr_entry] = -1;
+      curr_entry = -1;                  //There is no current task because it just finished
+   }        
   }
 
   for(int p=0; p<simTime; p++)
