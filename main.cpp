@@ -74,6 +74,7 @@ int main()
       ss >> temp;
       cout << "Period: " << temp << endl;
       taskset[i].set_period(temp);    //Set the current task's period
+      taskset[i].set_deadline(temp);  //Set the current task's deadline
 
     }
     systeminfo.close();
@@ -87,10 +88,10 @@ int main()
   /*******************************************************************************************************************/
   /**************** This ends the section handling the parsing of the input file *************************************/
 
-  printId(taskset, num_of_tasks);
   //Perform RM Scheduling
   rm_sch(taskset, num_of_tasks, sim_time, taskSchedule);
-  printId(taskset, num_of_tasks);
+
+
 
   //delete[] taskSchedule; //Free up the allocated space for the taskSchedule pointer.
   //delete[] taskset;    //Free up the allocated space for the taskset pointer.
@@ -112,19 +113,44 @@ void rm_sch(Task *tasks, int numTasks, int simTime, Schedule *taskSch)
   //Run in a loop for the entire simulation time to create a schedule
   for(int runtime=0; runtime<simTime; runtime++)
   {
-    //First - check to see if another task is waiting to be scheduled
-    //Second - If another task is ready to be scheduled, does it have higher priority (smaller period)?
-    //Third - If so, preempt the current task and add the current task to the waiting queue.
-    //         If not, continue execution of the current task. Add the new task in the waiting queue
-    
     //Add the current runtime to the schedule
     taskSch[runtime].set_curr_time(runtime);
+
+    //Check to see if any deadlines were missed
+    int q=0;
+    bool e_list = false;      
+
+    while(!e_list)
+    {
+      //See if the deadline was missed for the current task on the waiting queue
+      if(waitingQueue[q] != -1)
+      {
+        //The deadline was missed
+        if(runtime >= tasks[q].get_deadline())
+        {
+          cout << "The deadline for task: " << tasks[q].get_id() << " was missed!" << endl;
+          waitingQueue[q] = -1;
+          curr_entry = -1;
+          taskSch[runtime].set_deadline_missed_task(tasks[q].get_id());
+          tasks[q].set_rem_extime(tasks[q].get_extime());
+        }
+      }
+      if(q == (numTasks-1))
+      {
+        e_list = true;  //The end of the queue was reached
+      }
+      else
+        q++;
+    }
 
     //Add items to the waitinqQueue that are being released at the current runtime
     for(int i=0; i<numTasks; i++)
     {
       if(runtime % tasks[i].get_period() == 0)
-        waitingQueue[i] = i;      
+      {
+        waitingQueue[i] = i;    
+        tasks[i].set_deadline(runtime + tasks[i].get_period());     //Update the next deadline for the task
+      }  
     }
   
     bool ready_for_execution = false;
@@ -153,8 +179,9 @@ void rm_sch(Task *tasks, int numTasks, int simTime, Schedule *taskSch)
           m++;                        //Continue searching through the queue
       }
     }
-    else      //The current task still needs execution time - Determine if a preemption will occur
-    {    
+    else      //The current task still needs execution time - Determine if a preemption will occur 
+    {   
+      //Determine preemptions
       bool preemption_occured = false;
       ready_for_execution = true; //Some task is ready for execution
 
@@ -194,12 +221,13 @@ void rm_sch(Task *tasks, int numTasks, int simTime, Schedule *taskSch)
     }              
   }
 
-  cout << "Time\tTask ID\tPT ID" << endl;
-  cout << "-----------------------------------------" << endl;
+  cout << endl << endl << "Time\t|Task ID\t|Preempted Task\t|Deadline Miss\t" << endl;
+  cout << "-----------------------------------------------------------" << endl;
 
   for(int p=0; p<simTime; p++)
   {
-    cout << taskSch[p].get_curr_time() << "\t" << taskSch[p].get_task_id() << "\t" << taskSch[p].get_preempted_task() << endl;
+    cout << taskSch[p].get_curr_time() << "\t|\t" << taskSch[p].get_task_id() << "\t|\t" << taskSch[p].get_preempted_task() << "\t|\t" << taskSch[p].get_deadline_missed_task() << endl;
+    cout << "-----------------------------------------------------------" << endl;
   }
 
   cout << "--- Ending the RM scheduling algorithm ---" << endl;

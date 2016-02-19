@@ -14,6 +14,7 @@ Task::Task()
 	extime = -1;
 	period = -1;
   rem_extime = -1;
+  deadline = -1;
 }
 
 //Constructor
@@ -23,6 +24,7 @@ Task::Task(int id_t, int extime_t, int period_t)
   extime = extime_t;
   period = period_t;
   rem_extime = extime_t;
+  deadline = period_t;
 } 
 int Task::get_id() const
 {
@@ -55,4 +57,12 @@ int Task::get_rem_extime() const
 void Task::set_rem_extime(int rem_extime_t)
 {
   rem_extime = rem_extime_t;
+}
+int Task::get_deadline() const
+{
+  return deadline;
+}
+void Task::set_deadline(int deadline_t)
+{
+  deadline = deadline_t;
 }
