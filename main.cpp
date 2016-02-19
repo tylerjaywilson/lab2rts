@@ -410,6 +410,12 @@ bool period_cmp(const Task &a, const Task &b)
   return a.get_period() < b.get_period();
 }
 
+//Compare the deadlines of the different tasks to organize them in ascending order
+bool deadline_cmp(const Task &a, const Task &b)
+{
+  return a.get_deadline() < b.get_deadline();
+}
+
 //Print the ID of each task
 void printId(Task *tasks, int numTasks)
 {
