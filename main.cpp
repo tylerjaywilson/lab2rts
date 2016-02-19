@@ -24,6 +24,7 @@ bool period_cmp(Task const &a, Task const  &b);
 void printId(Task *, int);
 void printPeriod(Task *, int);
 void printCost(Task *, int);
+void printRMSch(Task *, Schedule *, int, int);
 
 //main function
 int main()
@@ -224,30 +225,8 @@ void rm_sch(Task *tasks, int numTasks, int simTime, Schedule *taskSch)
     }              
   }
 
-  //************PRINT THE SCHEDULE INFO TO THE CONSOLE******************************//
-  cout << endl << endl << "Time\t|Task ID\t|Preempted Task\t|Deadline Miss\t" << endl;
-  cout << "-----------------------------------------------------------" << endl;
-
-  for(int p=0; p<simTime; p++)
-  {
-    cout << taskSch[p].get_curr_time() << "\t|\t" << taskSch[p].get_task_id() << "\t|\t" << taskSch[p].get_preempted_task() << "\t|\t" << taskSch[p].get_deadline_missed_task() << endl;
-    cout << "-----------------------------------------------------------" << endl;
-  }
-
-  cout << endl << endl << "Task ID\t|Num Preempts\t|Num Misses" << endl;
-  cout << "------------------------------------------" << endl;
-
-  int tot_miss = 0, tot_preempt = 0;
-
-  for(int b=0; b<numTasks; b++)
-  {
-    cout << tasks[b].get_id() << "\t|\t" << tasks[b].get_num_preemptions() << "\t|\t" << tasks[b].get_num_misses() << endl;
-    tot_miss += tasks[b].get_num_misses();
-    tot_preempt += tasks[b].get_num_preemptions();
-  }
-  cout << "------------------------------------------" << endl;
-  cout << "Total\t|\t" << tot_preempt << "\t|\t" << tot_miss << endl << endl;
-  //**********FINISHED PRINTING SCHEDULE INFO***************************************//
+  //Print the RM Schedule
+  printRMSch(tasks, taskSch, simTime, numTasks);
 
   cout << "--- Ending the RM scheduling algorithm ---" << endl;
 }
@@ -441,4 +420,33 @@ void printCost(Task *tasks, int numTasks)
   {
     cout << tasks[i].get_extime() << endl;    
   }
+}
+
+//Print the RM schedule to the console
+void printRMSch(Task *tasks, Schedule *taskSch, int simTime, int numTasks)
+{
+  //************PRINT THE SCHEDULE INFO TO THE CONSOLE******************************//
+  cout << endl << endl << "Time\t|Task ID\t|Preempted Task\t|Deadline Miss\t" << endl;
+  cout << "-----------------------------------------------------------" << endl;
+
+  for(int p=0; p<simTime; p++)
+  {
+    cout << taskSch[p].get_curr_time() << "\t|\t" << taskSch[p].get_task_id() << "\t|\t" << taskSch[p].get_preempted_task() << "\t|\t" << taskSch[p].get_deadline_missed_task() << endl;
+    cout << "-----------------------------------------------------------" << endl;
+  }
+
+  cout << endl << endl << "Task ID\t|Num Preempts\t|Num Misses" << endl;
+  cout << "------------------------------------------" << endl;
+
+  int tot_miss = 0, tot_preempt = 0;
+
+  for(int b=0; b<numTasks; b++)
+  {
+    cout << tasks[b].get_id() << "\t|\t" << tasks[b].get_num_preemptions() << "\t|\t" << tasks[b].get_num_misses() << endl;
+    tot_miss += tasks[b].get_num_misses();
+    tot_preempt += tasks[b].get_num_preemptions();
+  }
+  cout << "------------------------------------------" << endl;
+  cout << "Total\t|\t" << tot_preempt << "\t|\t" << tot_miss << endl << endl;
+  //**********FINISHED PRINTING SCHEDULE INFO***************************************//
 }
