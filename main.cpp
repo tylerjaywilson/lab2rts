@@ -19,12 +19,14 @@ void rm_sch(Task *, int, int, Schedule *);
 void edf_sch(Task *, int, int, Schedule *);
 void edf_sch(Task *, int, int);
 bool period_cmp(Task const &a, Task const  &b);
+bool deadline_cmp(Task const &a, Task const &b);
 
 //Print functions
 void printId(Task *, int);
 void printPeriod(Task *, int);
 void printCost(Task *, int);
 void printRMSch(Task *, Schedule *, int, int);
+void printEDFSch(Task *, Schedule *, int, int);
 
 //main function
 int main()
@@ -34,8 +36,10 @@ int main()
   int sim_time = -1;        //The total simulation time of the system - Determined by an input file.
   //int hyper_period = -1;    //The hyper_period is used to determine the length of the schedule - WE MIGHT NOT USE THIS
   string input_line;        //Store each line from the input file to allow for parsing.
-  Task *taskset;            //A Task pointer that holds the information of all the tasks from the input file
-  Schedule *taskSchedule;   //The taskSchedule holds information regarding the operation of tasks at any given time
+  Task *tasksetRM;            //A Task pointer that holds the information of all the tasks from the input file
+  Task *tasksetEDF;
+  Schedule *taskScheduleRM;   //The taskSchedule holds information regarding the operation of tasks at any given time
+  Schedule *taskScheduleEDF;
   
   /*******************************************************************************************************************/
   /**************** This section handles the parsing of the input file ***********************************************/
@@ -45,8 +49,10 @@ int main()
     istringstream(input_line) >> num_of_tasks; 
     getline(systeminfo, input_line);              //Determine the total simulation time.
     istringstream(input_line) >> sim_time;
-    taskset = new Task[num_of_tasks];             //Allocate memory for the total number of tasks.
-    taskSchedule = new Schedule[sim_time];        //Allocate memory for the simulation time schedule.
+    tasksetRM = new Task[num_of_tasks];             //Allocate memory for the total number of tasks.
+    taskScheduleRM = new Schedule[sim_time];        //Allocate memory for the simulation time schedule.
+    tasksetEDF = new Task[num_of_tasks];             //Allocate memory for the total number of tasks.
+    taskScheduleEDF = new Schedule[sim_time];        //Allocate memory for the simulation time schedule.
 
     cout << endl << "Number of tasks: " << num_of_tasks << endl;
     cout << "Total Simulation Time: " << sim_time << endl;
@@ -59,24 +65,30 @@ int main()
 
       ss >> temp;
       //cout << "ID: " << temp << endl;
-      taskset[i].set_id(temp);        //Set the current task's ID
+      tasksetRM[i].set_id(temp);        //Set the current task's ID
+      tasksetEDF[i].set_id(temp);        //Set the current task's ID
 
       if(ss.peek() == ',')
         ss.ignore();
 
       ss >> temp;
       //cout << "Execution Time: " << temp << endl;
-      taskset[i].set_extime(temp);      //Set the current task's execution time
-      taskset[i].set_rem_extime(temp);  //Set the current task's remaining execution time
+      tasksetRM[i].set_extime(temp);      //Set the current task's execution time
+      tasksetRM[i].set_rem_extime(temp);  //Set the current task's remaining execution time
+      tasksetEDF[i].set_extime(temp);      //Set the current task's execution time
+      tasksetEDF[i].set_rem_extime(temp);  //Set the current task's remaining execution time
+
+
 
       if(ss.peek() == ',')
         ss.ignore();
 
       ss >> temp;
       //cout << "Period: " << temp << endl;
-      taskset[i].set_period(temp);    //Set the current task's period
-      taskset[i].set_deadline(temp);  //Set the current task's deadline
-
+      tasksetRM[i].set_period(temp);    //Set the current task's period
+      tasksetRM[i].set_deadline(temp);  //Set the current task's deadline
+      tasksetEDF[i].set_period(temp);    //Set the current task's period
+      tasksetEDF[i].set_deadline(temp);  //Set the current task's deadline
     }
     systeminfo.close();
   }
@@ -90,10 +102,10 @@ int main()
   /**************** This ends the section handling the parsing of the input file *************************************/
 
   //Perform RM scheduling
-  rm_sch(taskset, num_of_tasks, sim_time, taskSchedule);
+  rm_sch(tasksetRM, num_of_tasks, sim_time, taskScheduleRM);
 
   //Now perform EDF scheduling
-  edf_sch(taskset, num_of_tasks, sim_time, taskSchedule);
+  edf_sch(tasksetEDF, num_of_tasks, sim_time, taskScheduleEDF);
 
   //delete[] taskSchedule; //Free up the allocated space for the taskSchedule pointer.
   //delete[] taskset;    //Free up the allocated space for the taskset pointer.
@@ -108,6 +120,9 @@ void rm_sch(Task *tasks, int numTasks, int simTime, Schedule *taskSch)
 
   //Sort the tasks in the Task array to be sorted in ascending order of their period (RM)
   sort(tasks, tasks + numTasks, period_cmp);
+  cout << "Tasks: " << tasks[0].get_id() << " Deadline: " << tasks[0].get_deadline() << endl;
+  cout << "Tasks: " << tasks[1].get_id() << " Deadline: " << tasks[1].get_deadline() << endl;
+  cout << "Tasks: " << tasks[2].get_id() << " Deadline: " << tasks[2].get_deadline() << endl;
 
   int curr_entry = 0;
   int waitingQueue[numTasks];
@@ -188,10 +203,11 @@ void rm_sch(Task *tasks, int numTasks, int simTime, Schedule *taskSch)
       bool preemption_occured = false;
       ready_for_execution = true; //Some task is ready for execution
 
-      //Check to see if any other tasks are waiting that have higher priority. The tasks are ordered by priority so we only need to check up to the current task
+      //Check to see if any other tasks are waiting that have higher priority. We must check all the tasks to see if any deadlines
+      //are sooner than the current task
       for(int index=0; index < curr_entry; index++)
       {
-        if(waitingQueue[index] != -1) //Preemption will occur
+        if(waitingQueue[index] != -1) //Preemption will occur 
         {
           //cout << "Preemption occured! Task: " << tasks[curr_entry].get_id() << " was preempted!" << endl;        
           tasks[curr_entry].set_num_preemptions(tasks[curr_entry].get_num_preemptions()+1);
@@ -235,10 +251,12 @@ void rm_sch(Task *tasks, int numTasks, int simTime, Schedule *taskSch)
 void edf_sch(Task *tasks, int numTasks, int simTime, Schedule *taskSch)
 {
   cout << endl << "--- Beginning the EDF scheduling algorithm ---" << endl;
-
-  //Sort the tasks in the Task array to be sorted in ascending order of their period (RM)
-  sort(tasks, tasks + numTasks, period_cmp);
-
+  
+  //Sort the tasks in the Task array to be sorted in ascending order of their earliest deadline (EDF)
+  sort(tasks, tasks + numTasks, deadline_cmp);
+  cout << "Tasks: " << tasks[0].get_id() << " Deadline: " << tasks[0].get_deadline() << endl;
+  cout << "Tasks: " << tasks[1].get_id() << " Deadline: " << tasks[1].get_deadline() << endl;
+  cout << "Tasks: " << tasks[2].get_id() << " Deadline: " << tasks[2].get_deadline() << endl;
   int curr_entry = 0;
   int waitingQueue[numTasks];
 
@@ -319,9 +337,9 @@ void edf_sch(Task *tasks, int numTasks, int simTime, Schedule *taskSch)
       ready_for_execution = true; //Some task is ready for execution
 
       //Check to see if any other tasks are waiting that have higher priority. The tasks are ordered by priority so we only need to check up to the current task
-      for(int index=0; index < curr_entry; index++)
+      for(int index=0; index < numTasks; index++)
       {
-        if(waitingQueue[index] != -1) //Preemption will occur
+        if((waitingQueue[index] != -1) && (tasks[curr_entry].get_deadline()>tasks[index].get_deadline())) //Preemption will occur
         {
           //cout << "Preemption occured! Task: " << tasks[curr_entry].get_id() << " was preempted!" << endl;        
           tasks[curr_entry].set_num_preemptions(tasks[curr_entry].get_num_preemptions()+1);
@@ -355,30 +373,8 @@ void edf_sch(Task *tasks, int numTasks, int simTime, Schedule *taskSch)
     }              
   }
 
-  //************PRINT THE SCHEDULE INFO TO THE CONSOLE******************************//
-  cout << endl << endl << "Time\t|Task ID\t|Preempted Task\t|Deadline Miss\t" << endl;
-  cout << "-----------------------------------------------------------" << endl;
-
-  for(int p=0; p<simTime; p++)
-  {
-    cout << taskSch[p].get_curr_time() << "\t|\t" << taskSch[p].get_task_id() << "\t|\t" << taskSch[p].get_preempted_task() << "\t|\t" << taskSch[p].get_deadline_missed_task() << endl;
-    cout << "-----------------------------------------------------------" << endl;
-  }
-
-  cout << endl << endl << "Task ID\t|Num Preempts\t|Num Misses" << endl;
-  cout << "------------------------------------------" << endl;
-
-  int tot_miss = 0, tot_preempt = 0;
-
-  for(int b=0; b<numTasks; b++)
-  {
-    cout << tasks[b].get_id() << "\t|\t" << tasks[b].get_num_preemptions() << "\t|\t" << tasks[b].get_num_misses() << endl;
-    tot_miss += tasks[b].get_num_misses();
-    tot_preempt += tasks[b].get_num_preemptions();
-  }
-  cout << "------------------------------------------" << endl;
-  cout << "Total\t|\t" << tot_preempt << "\t|\t" << tot_miss << endl << endl;
-  //**********FINISHED PRINTING SCHEDULE INFO***************************************//
+  //Print the EDF schedule
+  printEDFSch(tasks, taskSch, simTime, numTasks);
 
   cout << "--- Ending the EDF scheduling algorithm ---" << endl;
 }
@@ -424,6 +420,35 @@ void printCost(Task *tasks, int numTasks)
 
 //Print the RM schedule to the console
 void printRMSch(Task *tasks, Schedule *taskSch, int simTime, int numTasks)
+{
+  //************PRINT THE SCHEDULE INFO TO THE CONSOLE******************************//
+  cout << endl << endl << "Time\t|Task ID\t|Preempted Task\t|Deadline Miss\t" << endl;
+  cout << "-----------------------------------------------------------" << endl;
+
+  for(int p=0; p<simTime; p++)
+  {
+    cout << taskSch[p].get_curr_time() << "\t|\t" << taskSch[p].get_task_id() << "\t|\t" << taskSch[p].get_preempted_task() << "\t|\t" << taskSch[p].get_deadline_missed_task() << endl;
+    cout << "-----------------------------------------------------------" << endl;
+  }
+
+  cout << endl << endl << "Task ID\t|Num Preempts\t|Num Misses" << endl;
+  cout << "------------------------------------------" << endl;
+
+  int tot_miss = 0, tot_preempt = 0;
+
+  for(int b=0; b<numTasks; b++)
+  {
+    cout << tasks[b].get_id() << "\t|\t" << tasks[b].get_num_preemptions() << "\t|\t" << tasks[b].get_num_misses() << endl;
+    tot_miss += tasks[b].get_num_misses();
+    tot_preempt += tasks[b].get_num_preemptions();
+  }
+  cout << "------------------------------------------" << endl;
+  cout << "Total\t|\t" << tot_preempt << "\t|\t" << tot_miss << endl << endl;
+  //**********FINISHED PRINTING SCHEDULE INFO***************************************//
+}
+
+//Print the EDF schedule to the console
+void printEDFSch(Task *tasks, Schedule *taskSch, int simTime, int numTasks)
 {
   //************PRINT THE SCHEDULE INFO TO THE CONSOLE******************************//
   cout << endl << endl << "Time\t|Task ID\t|Preempted Task\t|Deadline Miss\t" << endl;
