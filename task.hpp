@@ -8,6 +8,8 @@ class Task{
   int period;
   int rem_extime;
   int deadline;
+  int num_preemptions;
+  int num_misses;
 
 public:
   Task();
@@ -22,6 +24,10 @@ public:
   void set_rem_extime(int rem_extime_t);
   int get_deadline() const;
   void set_deadline(int deadline_t);
+  int get_num_preemptions() const;
+  void set_num_preemptions(int num_preemptions_t);
+  int get_num_misses() const;
+  void set_num_misses(int num_misses_t);
 };
 
 #endif

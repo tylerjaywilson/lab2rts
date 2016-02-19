@@ -15,6 +15,8 @@ Task::Task()
 	period = -1;
   rem_extime = -1;
   deadline = -1;
+  num_preemptions = 0;
+  num_misses = 0;
 }
 
 //Constructor
@@ -25,6 +27,8 @@ Task::Task(int id_t, int extime_t, int period_t)
   period = period_t;
   rem_extime = extime_t;
   deadline = period_t;
+  num_preemptions = 0;
+  num_misses = 0;
 } 
 int Task::get_id() const
 {
@@ -65,4 +69,20 @@ int Task::get_deadline() const
 void Task::set_deadline(int deadline_t)
 {
   deadline = deadline_t;
+}
+int Task::get_num_preemptions() const
+{
+  return num_preemptions;
+}
+void Task::set_num_preemptions(int num_preemptions_t)
+{
+  num_preemptions = num_preemptions_t;
+}
+int Task::get_num_misses() const
+{
+  return num_misses;
+}
+void Task::set_num_misses(int num_misses_t)
+{
+  num_misses = num_misses_t;
 }
