@@ -120,9 +120,9 @@ void rm_sch(Task *tasks, int numTasks, int simTime, Schedule *taskSch)
 
   //Sort the tasks in the Task array to be sorted in ascending order of their period (RM)
   sort(tasks, tasks + numTasks, period_cmp);
-  cout << "Tasks: " << tasks[0].get_id() << " Deadline: " << tasks[0].get_deadline() << endl;
-  cout << "Tasks: " << tasks[1].get_id() << " Deadline: " << tasks[1].get_deadline() << endl;
-  cout << "Tasks: " << tasks[2].get_id() << " Deadline: " << tasks[2].get_deadline() << endl;
+  //cout << "Tasks: " << tasks[0].get_id() << " Deadline: " << tasks[0].get_deadline() << endl;
+  //cout << "Tasks: " << tasks[1].get_id() << " Deadline: " << tasks[1].get_deadline() << endl;
+  //cout << "Tasks: " << tasks[2].get_id() << " Deadline: " << tasks[2].get_deadline() << endl;
 
   int curr_entry = 0;
   int waitingQueue[numTasks];
@@ -220,7 +220,7 @@ void rm_sch(Task *tasks, int numTasks, int simTime, Schedule *taskSch)
       if(!preemption_occured)
       {
         //cout << "No Preemption!" << endl;
-        taskSch[runtime].set_preempted_task(-1);
+        taskSch[runtime].set_preempted_task(0);
       }      
     }
 
@@ -254,9 +254,9 @@ void edf_sch(Task *tasks, int numTasks, int simTime, Schedule *taskSch)
   
   //Sort the tasks in the Task array to be sorted in ascending order of their earliest deadline (EDF)
   sort(tasks, tasks + numTasks, deadline_cmp);
-  cout << "Tasks: " << tasks[0].get_id() << " Deadline: " << tasks[0].get_deadline() << endl;
-  cout << "Tasks: " << tasks[1].get_id() << " Deadline: " << tasks[1].get_deadline() << endl;
-  cout << "Tasks: " << tasks[2].get_id() << " Deadline: " << tasks[2].get_deadline() << endl;
+  //cout << "Tasks: " << tasks[0].get_id() << " Deadline: " << tasks[0].get_deadline() << endl;
+  //cout << "Tasks: " << tasks[1].get_id() << " Deadline: " << tasks[1].get_deadline() << endl;
+  //cout << "Tasks: " << tasks[2].get_id() << " Deadline: " << tasks[2].get_deadline() << endl;
   int curr_entry = 0;
   int waitingQueue[numTasks];
 
@@ -352,7 +352,7 @@ void edf_sch(Task *tasks, int numTasks, int simTime, Schedule *taskSch)
       if(!preemption_occured)
       {
         //cout << "No Preemption!" << endl;
-        taskSch[runtime].set_preempted_task(-1);
+        taskSch[runtime].set_preempted_task(0);
       }      
     }
 
@@ -421,17 +421,23 @@ void printCost(Task *tasks, int numTasks)
 //Print the RM schedule to the console
 void printRMSch(Task *tasks, Schedule *taskSch, int simTime, int numTasks)
 {
-  //************PRINT THE SCHEDULE INFO TO THE CONSOLE******************************//
+  ofstream outfile;
+  outfile.open("RM_Schedule.csv");
+
+  //************PRINT THE SCHEDULE INFO TO THE CONSOLE AND FILE******************************//
   cout << endl << endl << "Time\t|Task ID\t|Preempted Task\t|Deadline Miss\t" << endl;
+  outfile << "Time,Task ID,Preempted Task,Deadline Miss\n";
   cout << "-----------------------------------------------------------" << endl;
 
   for(int p=0; p<simTime; p++)
   {
     cout << taskSch[p].get_curr_time() << "\t|\t" << taskSch[p].get_task_id() << "\t|\t" << taskSch[p].get_preempted_task() << "\t|\t" << taskSch[p].get_deadline_missed_task() << endl;
+    outfile << taskSch[p].get_curr_time() << "," << taskSch[p].get_task_id() << "," << taskSch[p].get_preempted_task() << "," << taskSch[p].get_deadline_missed_task() << "\n";
     cout << "-----------------------------------------------------------" << endl;
   }
 
   cout << endl << endl << "Task ID\t|Num Preempts\t|Num Misses" << endl;
+  outfile << "\n\n" << "Task ID,Num Preempts,Num Misses\n";
   cout << "------------------------------------------" << endl;
 
   int tot_miss = 0, tot_preempt = 0;
@@ -439,28 +445,37 @@ void printRMSch(Task *tasks, Schedule *taskSch, int simTime, int numTasks)
   for(int b=0; b<numTasks; b++)
   {
     cout << tasks[b].get_id() << "\t|\t" << tasks[b].get_num_preemptions() << "\t|\t" << tasks[b].get_num_misses() << endl;
+    outfile << tasks[b].get_id() << "," << tasks[b].get_num_preemptions() << "," << tasks[b].get_num_misses() << "\n";
     tot_miss += tasks[b].get_num_misses();
     tot_preempt += tasks[b].get_num_preemptions();
   }
   cout << "------------------------------------------" << endl;
   cout << "Total\t|\t" << tot_preempt << "\t|\t" << tot_miss << endl << endl;
+  outfile << "Total," << tot_preempt << "," << tot_miss << "\n\n";
   //**********FINISHED PRINTING SCHEDULE INFO***************************************//
+  outfile.close();
 }
 
 //Print the EDF schedule to the console
 void printEDFSch(Task *tasks, Schedule *taskSch, int simTime, int numTasks)
 {
+  ofstream outfile;
+  outfile.open("EDF_Schedule.csv");
+
   //************PRINT THE SCHEDULE INFO TO THE CONSOLE******************************//
   cout << endl << endl << "Time\t|Task ID\t|Preempted Task\t|Deadline Miss\t" << endl;
+  outfile << "Time,Task ID,Preempted Task,Deadline Miss\n";
   cout << "-----------------------------------------------------------" << endl;
 
   for(int p=0; p<simTime; p++)
   {
     cout << taskSch[p].get_curr_time() << "\t|\t" << taskSch[p].get_task_id() << "\t|\t" << taskSch[p].get_preempted_task() << "\t|\t" << taskSch[p].get_deadline_missed_task() << endl;
+    outfile << taskSch[p].get_curr_time() << "," << taskSch[p].get_task_id() << "," << taskSch[p].get_preempted_task() << "," << taskSch[p].get_deadline_missed_task() << "\n";
     cout << "-----------------------------------------------------------" << endl;
   }
 
   cout << endl << endl << "Task ID\t|Num Preempts\t|Num Misses" << endl;
+  outfile << "\n\n" << "Task ID,Num Preempts,Num Misses\n";
   cout << "------------------------------------------" << endl;
 
   int tot_miss = 0, tot_preempt = 0;
@@ -468,10 +483,14 @@ void printEDFSch(Task *tasks, Schedule *taskSch, int simTime, int numTasks)
   for(int b=0; b<numTasks; b++)
   {
     cout << tasks[b].get_id() << "\t|\t" << tasks[b].get_num_preemptions() << "\t|\t" << tasks[b].get_num_misses() << endl;
+    outfile << tasks[b].get_id() << "," << tasks[b].get_num_preemptions() << "," << tasks[b].get_num_misses() << "\n";
     tot_miss += tasks[b].get_num_misses();
     tot_preempt += tasks[b].get_num_preemptions();
   }
+  
   cout << "------------------------------------------" << endl;
   cout << "Total\t|\t" << tot_preempt << "\t|\t" << tot_miss << endl << endl;
+  outfile << "Total," << tot_preempt << "," << tot_miss << "\n\n";
   //**********FINISHED PRINTING SCHEDULE INFO***************************************//
+  outfile.close();
 }

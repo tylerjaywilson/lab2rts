@@ -20,9 +20,11 @@ input_file.txt: This file is used to read in a list of tasks. The format is as f
 	2,2,10
 	3,1,7
 
+*NOTE: None of the tasks shall have an ID entry of 0.
+
 main.cpp: Contains the code to run the RM and EDF schedule.
 
-schedule.cpp: Contains the code for the Schedule class - used to create an object that holds statistics to print to the console.
+schedule.cpp: Contains the code for the Schedule class - used to create an object that holds statistics to print to the console and output .csv file. A '0' in the output file indicates that no task was missed or preempted at that given runtime. 
 
 task.cpp: Contains the code for the Task class - used to hold the information for each individual task.
 

@@ -12,8 +12,8 @@ Schedule::Schedule()
 {
 	curr_time = -1;
   task_id = -1;
-  preempted_task = -1;
-  deadline_missed_task = -1;
+  preempted_task = 0;
+  deadline_missed_task = 0;
 }
 
 //Constructor
